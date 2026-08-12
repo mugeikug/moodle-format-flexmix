@@ -64,6 +64,42 @@ class format_flexmix extends format_flexmix_base_shim {
     }
 
     /**
+     * Returns true so new courses get the standard announcements forum in
+     * section 0, same as weeks/topics.
+     *
+     * @return bool
+     */
+    public function supports_news() {
+        return true;
+    }
+
+    /**
+     * Declares AJAX support (Moodle 3.x), same as weeks/topics. Without
+     * this, course/lib.php's include_course_ajax() never runs, which also
+     * disables the "how many sections do you want to add?" prompt on the
+     * "Add section" link.
+     *
+     * @return stdClass
+     */
+    public function supports_ajax() {
+        $ajaxsupport = new stdClass();
+        $ajaxsupport->capable = true;
+        return $ajaxsupport;
+    }
+
+    /**
+     * Declares compatibility with the Moodle 4.0+ reactive/component-based
+     * course page (drag-and-drop reordering without a full page reload,
+     * etc.), same as weeks. Ignored on Moodle 3.x, which has no such
+     * concept.
+     *
+     * @return bool
+     */
+    public function supports_components() {
+        return true;
+    }
+
+    /**
      * Returns the display name of the given section: the custom name if the
      * teacher set one, otherwise the type-aware default computed below.
      *

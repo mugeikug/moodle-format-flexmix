@@ -1,0 +1,60 @@
+/* This file is part of Moodle - http://moodle.org/
+ *
+ * Moodle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Moodle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * Boost's course.scss only resets list-style/spacing for "ul.topics" and
+ * "ul.weeks" specifically. Both the Moodle 3.x renderer (renderer.php) and
+ * Moodle 4.0+'s core reactive template (core_courseformat/local/content,
+ * which sets the <ul> class from the format's own short name) emit
+ * "ul.flexmix" instead, so without this it falls back to the browser's
+ * default bulleted list styling. Mirrors Boost's own rule, retargeted.
+ */
+.course-content ul.flexmix {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.course-content ul.flexmix li.section {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.course-content ul.flexmix li.section .content {
+    margin: 0;
+    padding: 0;
+}
+
+.course-content ul.flexmix li.section .left,
+.course-content ul.flexmix li.section .right {
+    padding: 0 6px 0;
+    text-align: right;
+    width: auto;
+}
+
+@media (min-width: 576px) {
+    .course-content ul.flexmix li.section .summary,
+    .course-content ul.flexmix li.section .content > .availabilityinfo {
+        margin-left: 25px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    body:not(.editing) .course-content ul.flexmix li.section .left,
+    body:not(.editing) .course-content ul.flexmix li.section .right {
+        display: none;
+    }
+}
