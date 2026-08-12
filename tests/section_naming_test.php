@@ -33,6 +33,11 @@ class section_naming_test extends \advanced_testcase {
     /**
      * Sets a section's type (and optional date) via the same
      * update_section_format_options() path the "edit section" form uses.
+     *
+     * @param \stdClass $course
+     * @param int $sectionnum
+     * @param string $type One of the format_flexmix::SECTIONTYPE_* constants.
+     * @param int $date
      */
     private function set_section_type(\stdClass $course, int $sectionnum, string $type, int $date = 0): void {
         global $DB;
