@@ -54,7 +54,11 @@ if (!class_exists('format_flexmix_renderer_base_shim')) {
         class_alias('format_section_renderer_base', 'format_flexmix_renderer_base_shim');
     } else {
         // Moodle 4.0+: never reference format_section_renderer_base here.
-        class_alias('stdClass', 'format_flexmix_renderer_base_shim');
+        // class_alias() cannot target a builtin class such as stdClass, so
+        // this declares its own empty placeholder directly under the shim
+        // name instead of aliasing to one.
+        class format_flexmix_renderer_base_shim {
+        }
     }
 }
 
