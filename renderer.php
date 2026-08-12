@@ -30,12 +30,12 @@
  * must never be looked up at all on that branch.
  *
  * Both requirements are satisfied by keeping the class declaration itself
- * unconditional, but resolving what it extends through a class_alias() set
- * up beforehand: the real format_section_renderer_base on Moodle 3.x
- * (checked for via \core_courseformat\base, a real, non-deprecated 4.0+
- * class, never via the deprecated name itself), or a harmless stdClass
- * placeholder on 4.0+, where this class is never actually instantiated
- * anyway (classes/output/renderer.php's namespaced renderer wins instead).
+ * unconditional, but resolving what it extends beforehand: an alias to the
+ * real format_section_renderer_base on Moodle 3.x (checked for via
+ * \core_courseformat\base, a real, non-deprecated 4.0+ class, never via the
+ * deprecated name itself), or an empty placeholder class on 4.0+, where
+ * format_flexmix_renderer is never actually instantiated anyway
+ * (classes/output/renderer.php's namespaced renderer wins instead).
  *
  * All of the type-aware section naming lives in lib.php; this only supplies
  * the generic markup/title that format_section_renderer_base requires.
@@ -57,6 +57,11 @@ if (!class_exists('format_flexmix_renderer_base_shim')) {
         // class_alias() cannot target a builtin class such as stdClass, so
         // this declares its own empty placeholder directly under the shim
         // name instead of aliasing to one.
+
+        /**
+         * Empty placeholder base used only on Moodle 4.0+, where
+         * format_flexmix_renderer is never actually instantiated.
+         */
         class format_flexmix_renderer_base_shim {
         }
     }
