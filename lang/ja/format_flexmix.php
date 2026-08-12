@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = '週・トピック・特別回(混在)';
 $string['section0name'] = '全般';
+$string['sectionoutline'] = 'コースセクション';
 
 $string['sectiontype'] = 'セクションの種別';
 $string['sectiontype_help'] = 'このセクションの扱い方を選択してください。

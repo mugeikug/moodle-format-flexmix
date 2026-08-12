@@ -18,10 +18,9 @@
  * Legacy (pre-4.0) renderer for format_flexmix.
  *
  * Moodle 4.0+ looks up classes/output/renderer.php instead and never loads
- * this file, so it is only relevant on Moodle 3.x branches where the core
- * weeks format still ships its renderer here. All of the type-aware section
- * naming lives in lib.php, so nothing needs to be overridden here beyond
- * reusing the core weeks renderer.
+ * this file. All of the type-aware section naming lives in lib.php, so this
+ * only needs to supply the generic markup/title that
+ * format_section_renderer_base requires from every course format.
  *
  * @package     format_flexmix
  * @copyright   2026 Hiroki Maezawa
@@ -30,14 +29,59 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-if (file_exists($CFG->dirroot . '/course/format/weeks/renderer.php')) {
-    require_once($CFG->dirroot . '/course/format/weeks/renderer.php');
-}
+require_once($CFG->dirroot . '/course/format/renderer.php');
 
-if (class_exists('format_weeks_renderer')) {
+/**
+ * Renderer for format_flexmix (Moodle 3.x).
+ */
+class format_flexmix_renderer extends format_section_renderer_base {
     /**
-     * Reuses the core weeks renderer unmodified.
+     * Generate the starting container html for a list of sections.
+     *
+     * @return string HTML to output.
      */
-    class format_flexmix_renderer extends format_weeks_renderer {
+    protected function start_section_list() {
+        return html_writer::start_tag('ul', ['class' => 'flexmix']);
+    }
+
+    /**
+     * Generate the closing container html for a list of sections.
+     *
+     * @return string HTML to output.
+     */
+    protected function end_section_list() {
+        return html_writer::end_tag('ul');
+    }
+
+    /**
+     * Generate the title for this section page.
+     *
+     * @return string the page title
+     */
+    protected function page_title() {
+        return get_string('sectionoutline', 'format_flexmix');
+    }
+
+    /**
+     * Generate the section title, wraps it in a link to the section page if
+     * the page is to be displayed on a separate page.
+     *
+     * @param stdClass $section The course_section entry from DB
+     * @param stdClass $course The course entry from DB
+     * @return string HTML to output.
+     */
+    public function section_title($section, $course) {
+        return $this->render(course_get_format($course)->inplace_editable_render_section_name($section));
+    }
+
+    /**
+     * Generate the section title to be displayed on the section page, without a link.
+     *
+     * @param stdClass $section The course_section entry from DB
+     * @param stdClass $course The course entry from DB
+     * @return string HTML to output.
+     */
+    public function section_title_without_link($section, $course) {
+        return $this->render(course_get_format($course)->inplace_editable_render_section_name($section, false));
     }
 }

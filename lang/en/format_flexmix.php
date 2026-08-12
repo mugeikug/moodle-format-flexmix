@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Weeks / topics / extra sessions (mixed)';
 $string['section0name'] = 'General';
+$string['sectionoutline'] = 'Course sections';
 
 $string['sectiontype'] = 'Section type';
 $string['sectiontype_help'] = 'Choose how this section behaves:
