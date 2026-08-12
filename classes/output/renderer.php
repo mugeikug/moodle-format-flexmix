@@ -16,8 +16,6 @@
 
 namespace format_flexmix\output;
 
-defined('MOODLE_INTERNAL') || die();
-
 // Moodle 3.x never loads this file (it looks for the legacy top-level
 // renderer.php instead), so this only runs on Moodle 4.0+. Prefer reusing
 // core weeks' namespaced renderer (inplace-editable section titles etc.);
@@ -36,6 +34,10 @@ if (!class_exists(__NAMESPACE__ . '\\flexmix_renderer_base_shim')) {
  *
  * All type-aware section naming lives in lib.php, so nothing needs to be
  * overridden here beyond reusing the core weeks renderer.
+ *
+ * @package     format_flexmix
+ * @copyright   2026 Hiroki Maezawa
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class renderer extends flexmix_renderer_base_shim {
 }

@@ -16,8 +16,6 @@
 
 namespace format_flexmix\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy provider. This course format only stores section-structure
  * metadata (section type and an optional session date) in the standard
@@ -28,6 +26,11 @@ defined('MOODLE_INTERNAL') || die();
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements \core_privacy\local\metadata\null_provider {
+    /**
+     * Explains why this plugin has no personal data to export.
+     *
+     * @return string
+     */
     public static function get_reason(): string {
         return 'privacy:metadata';
     }

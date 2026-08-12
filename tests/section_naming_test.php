@@ -16,8 +16,6 @@
 
 namespace format_flexmix;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Tests for the type-aware section naming/date logic in format_flexmix.
  *
@@ -32,7 +30,6 @@ defined('MOODLE_INTERNAL') || die();
  * @covers      \format_flexmix
  */
 class section_naming_test extends \advanced_testcase {
-
     /**
      * Sets a section's type (and optional date) via the same
      * update_section_format_options() path the "edit section" form uses.

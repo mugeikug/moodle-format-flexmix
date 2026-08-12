@@ -45,7 +45,6 @@ if (!class_exists('format_flexmix_base_shim')) {
  * Course format that mixes weekly, topic and ad-hoc (makeup class) sections.
  */
 class format_flexmix extends format_flexmix_base_shim {
-
     /** @var string Section behaves like a weeks-format section (dated, sequential). */
     const SECTIONTYPE_WEEK = 'week';
 
