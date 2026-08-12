@@ -16,28 +16,34 @@
 
 namespace format_flexmix\output;
 
-// Moodle 3.x never loads this file (it looks for the legacy top-level
-// renderer.php instead), so this only runs on Moodle 4.0+. Prefer reusing
-// core weeks' namespaced renderer (inplace-editable section titles etc.);
-// fall back to the generic core_courseformat section renderer if a future
-// branch ever removes format_weeks's one.
+// Moodle's classes/ autoloader is filesystem-convention based, not
+// version-aware: on Moodle 3.x, something resolving the renderer factory
+// can still trigger class_exists('format_flexmix\output\renderer'), which
+// autoloads and executes this file even though this output-class API is a
+// Moodle 4.0+ concept. On 3.x neither of the classes below exists, so this
+// must not blindly class_alias() to something that isn't there - leaving
+// flexmix_renderer_base_shim (and therefore `renderer`) undefined below is
+// the correct outcome: Moodle 3.x's renderer factory then falls back to
+// the legacy top-level renderer.php instead.
 if (!class_exists(__NAMESPACE__ . '\\flexmix_renderer_base_shim')) {
     if (class_exists('format_weeks\\output\\renderer')) {
         class_alias('format_weeks\\output\\renderer', __NAMESPACE__ . '\\flexmix_renderer_base_shim');
-    } else {
+    } else if (class_exists('core_courseformat\\output\\section_renderer')) {
         class_alias('core_courseformat\\output\\section_renderer', __NAMESPACE__ . '\\flexmix_renderer_base_shim');
     }
 }
 
-/**
- * Renderer for format_flexmix (Moodle 4.0+).
- *
- * All type-aware section naming lives in lib.php, so nothing needs to be
- * overridden here beyond reusing the core weeks renderer.
- *
- * @package     format_flexmix
- * @copyright   2026 Hiroki Maezawa
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class renderer extends flexmix_renderer_base_shim {
+if (class_exists(__NAMESPACE__ . '\\flexmix_renderer_base_shim')) {
+    /**
+     * Renderer for format_flexmix (Moodle 4.0+).
+     *
+     * All type-aware section naming lives in lib.php, so nothing needs to be
+     * overridden here beyond reusing the core weeks renderer.
+     *
+     * @package     format_flexmix
+     * @copyright   2026 Hiroki Maezawa
+     * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+     */
+    class renderer extends flexmix_renderer_base_shim {
+    }
 }
