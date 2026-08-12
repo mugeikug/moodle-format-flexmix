@@ -19,14 +19,23 @@
  *
  * This file is include_once'd unconditionally by Moodle's renderer factory
  * on every branch (lib/outputfactories.php::standard_renderer_classnames()),
- * regardless of whether the class it defines ends up being used. On Moodle
- * 4.0+, format_section_renderer_base is only a deprecated autoload alias for
- * \core_courseformat\output\section_renderer, and merely referencing that
- * deprecated name (even via class_exists()) raises a debugging() notice,
- * which Behat treats as a test failure. So the class below must only be
- * defined - must not even be looked up - on Moodle 3.x, which is guarded by
- * checking for \core_courseformat\base (a real, non-deprecated 4.0+ class)
- * instead of touching format_section_renderer_base at all on that branch.
+ * and moodle-plugin-ci's "validate" check expects to find the
+ * format_flexmix_renderer class declared unconditionally at the top level
+ * here (wrapping the whole class in an `if` made validate fail to find it).
+ *
+ * At the same time, on Moodle 4.0+ format_section_renderer_base is only a
+ * deprecated autoload alias for \core_courseformat\output\section_renderer,
+ * and merely referencing that deprecated name (even via class_exists())
+ * raises a debugging() notice, which Behat treats as a test failure - so it
+ * must never be looked up at all on that branch.
+ *
+ * Both requirements are satisfied by keeping the class declaration itself
+ * unconditional, but resolving what it extends through a class_alias() set
+ * up beforehand: the real format_section_renderer_base on Moodle 3.x
+ * (checked for via \core_courseformat\base, a real, non-deprecated 4.0+
+ * class, never via the deprecated name itself), or a harmless stdClass
+ * placeholder on 4.0+, where this class is never actually instantiated
+ * anyway (classes/output/renderer.php's namespaced renderer wins instead).
  *
  * All of the type-aware section naming lives in lib.php; this only supplies
  * the generic markup/title that format_section_renderer_base requires.
@@ -38,62 +47,69 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-if (!class_exists('core_courseformat\\base')) {
-    require_once($CFG->dirroot . '/course/format/renderer.php');
+if (!class_exists('format_flexmix_renderer_base_shim')) {
+    if (!class_exists('core_courseformat\\base')) {
+        // Moodle 3.x: format_section_renderer_base is real, not deprecated.
+        require_once($CFG->dirroot . '/course/format/renderer.php');
+        class_alias('format_section_renderer_base', 'format_flexmix_renderer_base_shim');
+    } else {
+        // Moodle 4.0+: never reference format_section_renderer_base here.
+        class_alias('stdClass', 'format_flexmix_renderer_base_shim');
+    }
+}
+
+/**
+ * Renderer for format_flexmix (Moodle 3.x). Never instantiated on 4.0+.
+ */
+class format_flexmix_renderer extends format_flexmix_renderer_base_shim {
+    /**
+     * Generate the starting container html for a list of sections.
+     *
+     * @return string HTML to output.
+     */
+    protected function start_section_list() {
+        return html_writer::start_tag('ul', ['class' => 'flexmix']);
+    }
 
     /**
-     * Renderer for format_flexmix (Moodle 3.x).
+     * Generate the closing container html for a list of sections.
+     *
+     * @return string HTML to output.
      */
-    class format_flexmix_renderer extends format_section_renderer_base {
-        /**
-         * Generate the starting container html for a list of sections.
-         *
-         * @return string HTML to output.
-         */
-        protected function start_section_list() {
-            return html_writer::start_tag('ul', ['class' => 'flexmix']);
-        }
+    protected function end_section_list() {
+        return html_writer::end_tag('ul');
+    }
 
-        /**
-         * Generate the closing container html for a list of sections.
-         *
-         * @return string HTML to output.
-         */
-        protected function end_section_list() {
-            return html_writer::end_tag('ul');
-        }
+    /**
+     * Generate the title for this section page.
+     *
+     * @return string the page title
+     */
+    protected function page_title() {
+        return get_string('sectionoutline', 'format_flexmix');
+    }
 
-        /**
-         * Generate the title for this section page.
-         *
-         * @return string the page title
-         */
-        protected function page_title() {
-            return get_string('sectionoutline', 'format_flexmix');
-        }
+    /**
+     * Generate the section title, wraps it in a link to the section page if
+     * the page is to be displayed on a separate page.
+     *
+     * @param stdClass $section The course_section entry from DB
+     * @param stdClass $course The course entry from DB
+     * @return string HTML to output.
+     */
+    public function section_title($section, $course) {
+        return $this->render(course_get_format($course)->inplace_editable_render_section_name($section));
+    }
 
-        /**
-         * Generate the section title, wraps it in a link to the section page
-         * if the page is to be displayed on a separate page.
-         *
-         * @param stdClass $section The course_section entry from DB
-         * @param stdClass $course The course entry from DB
-         * @return string HTML to output.
-         */
-        public function section_title($section, $course) {
-            return $this->render(course_get_format($course)->inplace_editable_render_section_name($section));
-        }
-
-        /**
-         * Generate the section title to be displayed on the section page,
-         * without a link.
-         *
-         * @param stdClass $section The course_section entry from DB
-         * @param stdClass $course The course entry from DB
-         * @return string HTML to output.
-         */
-        public function section_title_without_link($section, $course) {
-            return $this->render(course_get_format($course)->inplace_editable_render_section_name($section, false));
-        }
+    /**
+     * Generate the section title to be displayed on the section page,
+     * without a link.
+     *
+     * @param stdClass $section The course_section entry from DB
+     * @param stdClass $course The course entry from DB
+     * @return string HTML to output.
+     */
+    public function section_title_without_link($section, $course) {
+        return $this->render(course_get_format($course)->inplace_editable_render_section_name($section, false));
     }
 }
