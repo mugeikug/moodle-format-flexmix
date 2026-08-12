@@ -1,0 +1,89 @@
+name: format_flexmix CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Moodle 3.11 LTS.
+          - php: '7.4'
+            moodle-branch: 'MOODLE_311_STABLE'
+            database: 'pgsql'
+          # Moodle 4.1 LTS.
+          - php: '8.0'
+            moodle-branch: 'MOODLE_401_STABLE'
+            database: 'pgsql'
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: 'postgres'
+          POSTGRES_HOST_AUTH_METHOD: 'trust'
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
+
+    steps:
+      - name: Check out the plugin
+        uses: actions/checkout@v4
+        with:
+          path: plugin
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, pgsql, zip, gd, xmlrpc, soap, intl
+          ini-values: max_input_vars=5000
+          coverage: none
+
+      - name: Deploy moodle-plugin-ci
+        run: |
+          composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^4
+          echo "$(cd ci/bin; pwd)" >> $GITHUB_PATH
+          echo "$(cd ci/vendor/bin; pwd)" >> $GITHUB_PATH
+          sudo locale-gen en_AU.UTF-8
+
+      - name: Install Moodle
+        env:
+          DB: ${{ matrix.database }}
+          MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+        run: moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
+
+      - name: PHP lint
+        run: moodle-plugin-ci phplint
+
+      - name: PHP copy/paste detector
+        continue-on-error: true
+        run: moodle-plugin-ci phpcpd
+
+      - name: PHP mess detector
+        continue-on-error: true
+        run: moodle-plugin-ci phpmd
+
+      - name: Moodle code checker
+        run: moodle-plugin-ci phpcs
+
+      - name: Moodle PHPDoc checker
+        run: moodle-plugin-ci phpdoc
+
+      - name: Validate plugin
+        run: moodle-plugin-ci validate
+
+      - name: Check upgrade savepoints
+        run: moodle-plugin-ci savepoints
+
+      - name: Mustache lint
+        run: moodle-plugin-ci mustache
+
+      - name: PHPUnit tests
+        run: moodle-plugin-ci phpunit --fail-on-warning
+
+      - name: Behat features
+        run: moodle-plugin-ci behat --profile chrome
